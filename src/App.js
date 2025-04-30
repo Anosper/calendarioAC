@@ -504,7 +504,7 @@ const App = () => {
 
   // Constantes fixas
   const employeesDistribuicao = ["Camila", "Gabriel", "Flávia", "Mário"];
-  const employeesAdvogados = ["Catarine", "Daniel", "Karine", "Rafael"];
+  const employeesAdvogados = ["Catarine", "Daniel", "Karine", "Rafael", "Thayane"];
   const holidays = [
     "2025-01-01",
     "2025-01-20",
