@@ -56,7 +56,7 @@ body::before {
 /* Container para título e botões */
 .page-title-container {
     position: absolute;
-    top: 120px;
+    top: 70px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -292,7 +292,7 @@ td.state-holiday {
     max-width: 200px;
     position: absolute;
     bottom: 10px;
-    right: 200px;
+    right: 300px;
 }
 .legend h3 {
     margin: 0;
