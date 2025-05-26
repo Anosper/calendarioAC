@@ -503,8 +503,8 @@ const App = () => {
   const [backgroundImage, setBackgroundImage] = useState(totoro);
 
   // Constantes fixas
-  const employeesDistribuicao = ["Camila", "Gabriel", "Flávia", "Mário"];
-  const employeesAdvogados = ["Catarine", "Daniel", "Karine", "Rafael", "Thayanne"];
+  const employeesDistribuicao = ["Gabriel", "Flávia", "Mário"];
+  const employeesAdvogados = ["Catarine", "Daniel", "Karine", "Rafael", "Thayanne", "Camila"];
   const holidays = [
     "2025-01-01",
     "2025-01-20",
