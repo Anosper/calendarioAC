@@ -959,12 +959,11 @@ const removeEmployee = async (employee) => {
   <div id="action-modal" className="modal" style={{ display: "flex" }}>
     <div className="modal-content">
       <h3 id="modal-title">
-        {(() => {
-          return currentTitle === "ADVOGADOS"
-            ? "Selecione/Remova Advogado(s)"
-            : "Selecione/Remova Funcionário(s)";
-        })()}
+        {currentTitle === "ADVOGADOS"
+          ? "Selecione/Remova Advogado(s)"
+          : "Selecione/Remova Funcionário(s)"}
       </h3>
+
       <p id="modal-message">
         {(() => {
           const currentData =
@@ -995,6 +994,7 @@ const removeEmployee = async (employee) => {
           return `Selecione alguém para o dia ${selectedDate}`;
         })()}
       </p>
+
       <div
         id="employee-buttons"
         style={{
@@ -1004,13 +1004,12 @@ const removeEmployee = async (employee) => {
           width: "100%",
         }}
       >
-        {currentTitle === "DISTRIBUIÇÃO" || currentTitle === "ADVOGADOS" ? (
+        {(currentTitle === "DISTRIBUIÇÃO" || currentTitle === "ADVOGADOS") && (
           <>
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
-                flexWrap: "wrap",
                 gap: "10px",
                 justifyContent: "center",
                 alignItems: "center",
@@ -1056,7 +1055,6 @@ const removeEmployee = async (employee) => {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                flexWrap: "wrap",
                 gap: "10px",
                 justifyContent: "center",
                 alignItems: "center",
@@ -1089,17 +1087,18 @@ const removeEmployee = async (employee) => {
               </div>
             </div>
           </>
-        ) : null}
+        )}
       </div>
+
       <div className="modal-buttons">
-        {(currentTitle === "DISTRIBUIÇÃO" &&
+        {((currentTitle === "DISTRIBUIÇÃO" &&
           homeOfficeDistribuicao[selectedDate]?.length > 0) ||
-        (currentTitle === "ADVOGADOS" &&
-          homeOfficeAdvogados[selectedDate]?.length > 0) ? (
+          (currentTitle === "ADVOGADOS" &&
+            homeOfficeAdvogados[selectedDate]?.length > 0)) && (
           <button id="remove-btn" onClick={removeSelection}>
             Remover
           </button>
-        ) : null}
+        )}
         <button id="close-btn" onClick={() => setShowActionModal(false)}>
           Fechar
         </button>
@@ -1107,7 +1106,6 @@ const removeEmployee = async (employee) => {
     </div>
   </div>
 )}
-
 
       {/* Modal de Anotações */}
       {showNotesModal && (
