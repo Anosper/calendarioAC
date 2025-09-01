@@ -660,14 +660,6 @@ const selectEmployee = async (employee) => {
       ? { ...homeOfficeDistribuicao }
       : { ...homeOfficeAdvogados };
 
-  if (
-    currentTitle === "DISTRIBUIÇÃO" &&
-    isEmployeeAlreadyAssigned(employee, selectedDate)
-  ) {
-    alert(`${employee} já está de home office esta semana.`);
-    return;
-  }
-
   if (!currentData[selectedDate]) {
     currentData[selectedDate] = [];
   }
