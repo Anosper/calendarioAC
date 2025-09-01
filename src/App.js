@@ -947,129 +947,159 @@ const App = () => {
         </div>
       </div>
       {/* Modal de Ação */}
-      {showActionModal && (
-        <div id="action-modal" className="modal" style={{ display: "flex" }}>
-          <div className="modal-content">
-            <h3 id="modal-title">
-              {(() => {
-                const currentData =
-                  currentTitle === "DISTRIBUIÇÃO"
-                    ? homeOfficeDistribuicao
-                    : homeOfficeAdvogados;
-                // Para DISTRIBUIÇÃO, se já houver designação, mostra mensagem de alerta.
-                // Para ADVOGADOS, sempre exibe a modal para seleção.
-                if (
-                  currentTitle === "DISTRIBUIÇÃO" &&
-                  currentData[selectedDate]
-                ) {
-                  return "Atenção!";
-                }
-                return currentTitle === "ADVOGADOS"
-                  ? "Selecione/Remova Advogado(s)"
-                  : "Escolha um Funcionário(a)";
-              })()}
-            </h3>
-            <p id="modal-message">
-              {(() => {
-                const currentData =
-                  currentTitle === "DISTRIBUIÇÃO"
-                    ? homeOfficeDistribuicao
-                    : homeOfficeAdvogados;
-                if (
-                  currentTitle === "DISTRIBUIÇÃO" &&
-                  currentData[selectedDate]
-                ) {
-                  const tipo =
-                    currentTitle === "ADVOGADOS"
-                      ? "presencial"
-                      : "de home office";
-                  const employeesList = currentData[selectedDate];
-                  let formattedEmployees;
-                  if (employeesList.length === 1) {
-                    formattedEmployees = employeesList[0];
-                  } else if (employeesList.length === 2) {
-                    formattedEmployees = employeesList.join(" e ");
-                  } else {
-                    formattedEmployees =
-                      employeesList.slice(0, -1).join(", ") +
-                      " e " +
-                      employeesList[employeesList.length - 1];
-                  }
-                  return `${formattedEmployees} ${
-                    employeesList.length > 1 ? "já estão" : "já está"
-                  } ${tipo} para este dia.`;
-                }
-                return `Selecione alguém para o dia ${selectedDate}`;
-              })()}
-            </p>
+{showActionModal && (
+  <div id="action-modal" className="modal" style={{ display: "flex" }}>
+    <div className="modal-content">
+      <h3 id="modal-title">
+        {(() => {
+          return currentTitle === "ADVOGADOS"
+            ? "Selecione/Remova Advogado(s)"
+            : "Selecione/Remova Funcionário(s)";
+        })()}
+      </h3>
+      <p id="modal-message">
+        {(() => {
+          const currentData =
+            currentTitle === "DISTRIBUIÇÃO"
+              ? homeOfficeDistribuicao
+              : homeOfficeAdvogados;
+
+          const employeesList = currentData[selectedDate] || [];
+
+          if (employeesList.length > 0) {
+            let formattedEmployees;
+            if (employeesList.length === 1) {
+              formattedEmployees = employeesList[0];
+            } else if (employeesList.length === 2) {
+              formattedEmployees = employeesList.join(" e ");
+            } else {
+              formattedEmployees =
+                employeesList.slice(0, -1).join(", ") +
+                " e " +
+                employeesList[employeesList.length - 1];
+            }
+
+            return `${formattedEmployees} ${
+              employeesList.length > 1 ? "já estão" : "já está"
+            } de home office para este dia.`;
+          }
+
+          return `Selecione alguém para o dia ${selectedDate}`;
+        })()}
+      </p>
+      <div
+        id="employee-buttons"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "15px",
+          width: "100%",
+        }}
+      >
+        {currentTitle === "DISTRIBUIÇÃO" || currentTitle === "ADVOGADOS" ? (
+          <>
             <div
-              id="employee-buttons"
-              style={{ display: "flex", flexDirection: "row", gap: "5px", width: "280px"}}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flexWrap: "wrap",
+                gap: "10px",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              {currentTitle === "DISTRIBUIÇÃO" ? (
-                // Para DISTRIBUIÇÃO, se ainda não houver designação, exibe a lista completa
-                !homeOfficeDistribuicao[selectedDate] &&
-                employeesDistribuicao.map((employee) => (
-                  <button
-                    key={employee}
-                    onClick={() => selectEmployee(employee)}
-                  >
-                    {employee}
-                  </button>
-                ))
-              ) : (
-                // Para ADVOGADOS, exibe duas seções:
-                <>
-                  <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
-                    <h4>Disponíveis:</h4>
-                    {(() => {
-                      const selectedEmployees =
-                        homeOfficeAdvogados[selectedDate] || [];
-                      const availableEmployees = employeesAdvogados.filter(
-                        (employee) => !selectedEmployees.includes(employee)
-                      );
-                      return availableEmployees.map((employee) => (
-                        <button
-                          key={employee}
-                          onClick={() => selectEmployee(employee)}
-                        >
-                          {employee}
-                        </button>
-                      ));
-                    })()}
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
-                    <h4>Selecionados:</h4>
-                    {(() => {
-                      const selectedEmployees =
-                        homeOfficeAdvogados[selectedDate] || [];
-                      return selectedEmployees.map((employee) => (
-                        <button
-                          key={employee}
-                          onClick={() => removeEmployee(employee)}
-                        >
-                          {employee} 
-                        </button>
-                      ));
-                    })()}
-                  </div>
-                </>
-              )}
+              <h4>Disponíveis:</h4>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  justifyContent: "center",
+                }}
+              >
+                {(() => {
+                  const selectedEmployees =
+                    currentTitle === "DISTRIBUIÇÃO"
+                      ? homeOfficeDistribuicao[selectedDate] || []
+                      : homeOfficeAdvogados[selectedDate] || [];
+
+                  const employeesList =
+                    currentTitle === "DISTRIBUIÇÃO"
+                      ? employeesDistribuicao
+                      : employeesAdvogados;
+
+                  const availableEmployees = employeesList.filter(
+                    (employee) => !selectedEmployees.includes(employee)
+                  );
+
+                  return availableEmployees.map((employee) => (
+                    <button
+                      key={employee}
+                      onClick={() => selectEmployee(employee)}
+                    >
+                      {employee}
+                    </button>
+                  ));
+                })()}
+              </div>
             </div>
-            <div className="modal-buttons">
-              {currentTitle === "DISTRIBUIÇÃO" &&
-              homeOfficeDistribuicao[selectedDate] ? (
-                <button id="remove-btn" onClick={removeSelection}>
-                  Remover
-                </button>
-              ) : null}
-              <button id="close-btn" onClick={() => setShowActionModal(false)}>
-                Fechar
-              </button>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flexWrap: "wrap",
+                gap: "10px",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <h4>Selecionados:</h4>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  justifyContent: "center",
+                }}
+              >
+                {(() => {
+                  const selectedEmployees =
+                    currentTitle === "DISTRIBUIÇÃO"
+                      ? homeOfficeDistribuicao[selectedDate] || []
+                      : homeOfficeAdvogados[selectedDate] || [];
+
+                  return selectedEmployees.map((employee) => (
+                    <button
+                      key={employee}
+                      onClick={() => removeEmployee(employee)}
+                    >
+                      {employee}
+                    </button>
+                  ));
+                })()}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        ) : null}
+      </div>
+      <div className="modal-buttons">
+        {(currentTitle === "DISTRIBUIÇÃO" &&
+          homeOfficeDistribuicao[selectedDate]?.length > 0) ||
+        (currentTitle === "ADVOGADOS" &&
+          homeOfficeAdvogados[selectedDate]?.length > 0) ? (
+          <button id="remove-btn" onClick={removeSelection}>
+            Remover
+          </button>
+        ) : null}
+        <button id="close-btn" onClick={() => setShowActionModal(false)}>
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Modal de Anotações */}
       {showNotesModal && (
