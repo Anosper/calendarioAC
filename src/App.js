@@ -605,144 +605,160 @@ const App = () => {
 
   // Verifica se o funcionário já foi designado na semana (para DISTRIBUIÇÃO)
   const isEmployeeAlreadyAssigned = (employee, dateStr) => {
-    const dateObj = new Date(dateStr);
-    const week = getWeekNumber(dateObj);
-    const currentData =
-      currentTitle === "DISTRIBUIÇÃO"
-        ? homeOfficeDistribuicao
-        : homeOfficeAdvogados;
-    for (let dateKey in currentData) {
-      const assignedDate = new Date(dateKey);
-      if (
-        getWeekNumber(assignedDate) === week &&
-        currentData[dateKey].includes(employee)
-      ) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  // Calcula o número da semana do ano para uma data
-  const getWeekNumber = (date) => {
-    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-    const pastDays = Math.floor((date - firstDayOfYear) / 86400000);
-    return Math.ceil((pastDays + firstDayOfYear.getDay() + 1) / 7);
-  };
-
-  // Ao clicar em uma célula do calendário
-  const onCellClick = (cellDate, isWeekend, isHoliday, isDisabled) => {
-    const dateStr = formatDate(cellDate);
-    if (isWeekend) {
-      alert("Não é possível atribuir em finais de semana!!");
-      return;
-    }
-    if (isHoliday) {
-      alert("Não é possível atribuir em feriados!!");
-      return;
-    }
-    if (isDisabled) return;
-    setSelectedDate(dateStr);
-    // Para ADVOGADOS, sempre mostra o modal de ação com a lista filtrada,
-    // permitindo a seleção adicional mesmo que já existam advogados designados.
-    if (currentTitle === "ADVOGADOS") {
-      setShowActionModal(true);
-    } else {
-      // Para DISTRIBUIÇÃO, se houver nota, mostra o modal de lembrete; caso contrário, mostra a seleção.
-      if (notes[dateStr]) {
-        setReminderData(notes[dateStr]);
-        setShowReminderModal(true);
-      } else {
-        setShowActionModal(true);
-      }
-    }
-  };
-
-  // Seleciona funcionário na modal de ação e atualiza o Firestore
-  const selectEmployee = async (employee) => {
-    const currentData =
-      currentTitle === "DISTRIBUIÇÃO"
-        ? { ...homeOfficeDistribuicao }
-        : { ...homeOfficeAdvogados };
-
+  const dateObj = new Date(dateStr);
+  const week = getWeekNumber(dateObj);
+  const currentData =
+    currentTitle === "DISTRIBUIÇÃO"
+      ? homeOfficeDistribuicao
+      : homeOfficeAdvogados;
+  for (let dateKey in currentData) {
+    const assignedDate = new Date(dateKey);
     if (
-      currentTitle === "DISTRIBUIÇÃO" &&
-      isEmployeeAlreadyAssigned(employee, selectedDate)
+      getWeekNumber(assignedDate) === week &&
+      currentData[dateKey].includes(employee)
     ) {
-      alert(`${employee} já está de home office esta semana.`);
-      return;
+      return true;
     }
-    if (!currentData[selectedDate]) {
-      currentData[selectedDate] = [];
-    }
-    if (currentData[selectedDate].includes(employee)) {
-      alert(`${employee} já foi adicionado(a) neste dia.`);
-      return;
-    }
-    currentData[selectedDate].push(employee);
-    try {
-      if (currentTitle === "DISTRIBUIÇÃO") {
-        setHomeOfficeDistribuicao(currentData);
-        await setDoc(
-          doc(db, "calendarData", "homeOfficeDistribuicao"),
-          currentData
-        );
-        // Para DISTRIBUIÇÃO, fecha o modal após a seleção.
-        setShowActionModal(false);
-      } else {
-        // Para ADVOGADOS, atualiza mas mantém o modal aberto para permitir novas seleções.
-        setHomeOfficeAdvogados(currentData);
-        await setDoc(
-          doc(db, "calendarData", "homeOfficeAdvogados"),
-          currentData
-        );
-      }
-    } catch (error) {
-      console.error("Erro ao salvar designação:", error);
-    }
-  };
+  }
+  return false;
+};
 
-  // Remove a designação de funcionário do dia selecionado e atualiza o Firestore
-  const removeSelection = async () => {
-    const currentData =
-      currentTitle === "DISTRIBUIÇÃO"
-        ? { ...homeOfficeDistribuicao }
-        : { ...homeOfficeAdvogados };
-    delete currentData[selectedDate];
-    try {
-      if (currentTitle === "DISTRIBUIÇÃO") {
-        setHomeOfficeDistribuicao(currentData);
-        await setDoc(
-          doc(db, "calendarData", "homeOfficeDistribuicao"),
-          currentData
-        );
-      } else {
-        setHomeOfficeAdvogados(currentData);
-        await setDoc(
-          doc(db, "calendarData", "homeOfficeAdvogados"),
-          currentData
-        );
-      }
-    } catch (error) {
-      console.error("Erro ao remover designação:", error);
-    }
-    setShowActionModal(false);
-  };
+// Calcula o número da semana do ano para uma data
+const getWeekNumber = (date) => {
+  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+  const pastDays = Math.floor((date - firstDayOfYear) / 86400000);
+  return Math.ceil((pastDays + firstDayOfYear.getDay() + 1) / 7);
+};
 
-  const removeEmployee = async (employee) => {
-    const currentData = { ...homeOfficeAdvogados };
-    if (currentData[selectedDate]) {
-      currentData[selectedDate] = currentData[selectedDate].filter(
-        (e) => e !== employee
+// Ao clicar em uma célula do calendário
+const onCellClick = (cellDate, isWeekend, isHoliday, isDisabled) => {
+  const dateStr = formatDate(cellDate);
+  if (isWeekend) {
+    alert("Não é possível atribuir em finais de semana!!");
+    return;
+  }
+  if (isHoliday) {
+    alert("Não é possível atribuir em feriados!!");
+    return;
+  }
+  if (isDisabled) return;
+  setSelectedDate(dateStr);
+
+  // Em ambos os casos, abre o modal de ação (removemos o comportamento exclusivo da DISTRIBUIÇÃO)
+  if (notes[dateStr]) {
+    setReminderData(notes[dateStr]);
+    setShowReminderModal(true);
+  } else {
+    setShowActionModal(true);
+  }
+};
+
+// Seleciona funcionário na modal de ação e atualiza o Firestore
+const selectEmployee = async (employee) => {
+  const currentData =
+    currentTitle === "DISTRIBUIÇÃO"
+      ? { ...homeOfficeDistribuicao }
+      : { ...homeOfficeAdvogados };
+
+  if (
+    currentTitle === "DISTRIBUIÇÃO" &&
+    isEmployeeAlreadyAssigned(employee, selectedDate)
+  ) {
+    alert(`${employee} já está de home office esta semana.`);
+    return;
+  }
+
+  if (!currentData[selectedDate]) {
+    currentData[selectedDate] = [];
+  }
+
+  if (currentData[selectedDate].includes(employee)) {
+    alert(`${employee} já foi adicionado(a) neste dia.`);
+    return;
+  }
+
+  currentData[selectedDate].push(employee);
+
+  try {
+    if (currentTitle === "DISTRIBUIÇÃO") {
+      setHomeOfficeDistribuicao(currentData);
+      await setDoc(
+        doc(db, "calendarData", "homeOfficeDistribuicao"),
+        currentData
+      );
+    } else {
+      setHomeOfficeAdvogados(currentData);
+      await setDoc(
+        doc(db, "calendarData", "homeOfficeAdvogados"),
+        currentData
       );
     }
-    try {
+  } catch (error) {
+    console.error("Erro ao salvar designação:", error);
+  }
+};
+
+// Remove todos os funcionários de uma data
+const removeSelection = async () => {
+  const currentData =
+    currentTitle === "DISTRIBUIÇÃO"
+      ? { ...homeOfficeDistribuicao }
+      : { ...homeOfficeAdvogados };
+
+  delete currentData[selectedDate];
+
+  try {
+    if (currentTitle === "DISTRIBUIÇÃO") {
+      setHomeOfficeDistribuicao(currentData);
+      await setDoc(
+        doc(db, "calendarData", "homeOfficeDistribuicao"),
+        currentData
+      );
+    } else {
       setHomeOfficeAdvogados(currentData);
-      await setDoc(doc(db, "calendarData", "homeOfficeAdvogados"), currentData);
-    } catch (error) {
-      console.error("Erro ao remover advogado:", error);
+      await setDoc(
+        doc(db, "calendarData", "homeOfficeAdvogados"),
+        currentData
+      );
     }
-  };
+  } catch (error) {
+    console.error("Erro ao remover designação:", error);
+  }
+
+  setShowActionModal(false);
+};
+
+// Remove funcionário individual de uma data
+const removeEmployee = async (employee) => {
+  const currentData =
+    currentTitle === "DISTRIBUIÇÃO"
+      ? { ...homeOfficeDistribuicao }
+      : { ...homeOfficeAdvogados };
+
+  if (currentData[selectedDate]) {
+    currentData[selectedDate] = currentData[selectedDate].filter(
+      (e) => e !== employee
+    );
+  }
+
+  try {
+    if (currentTitle === "DISTRIBUIÇÃO") {
+      setHomeOfficeDistribuicao(currentData);
+      await setDoc(
+        doc(db, "calendarData", "homeOfficeDistribuicao"),
+        currentData
+      );
+    } else {
+      setHomeOfficeAdvogados(currentData);
+      await setDoc(
+        doc(db, "calendarData", "homeOfficeAdvogados"),
+        currentData
+      );
+    }
+  } catch (error) {
+    console.error("Erro ao remover funcionário:", error);
+  }
+};
 
   // Troca de mês
   const changeMonth = (increment) => {
